@@ -3,6 +3,14 @@ WIN_WIDTH = 1200
 WIN_HEIGHT = 700
 WIN_CAPTION = "Random Topdown"
 FPS = 60
+TILESIZE = 32
+
+#Player
+PLAYER_LAYER = 5
+PLAYER_SPEED = 5
+
+#Block
+BLOCK_LAYER = 0
 
 #Colors
 BLACK = (0, 0, 0)

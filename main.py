@@ -13,8 +13,12 @@ class Game:
 
         #Set groups
         self.all_sprites = pygame.sprite.LayeredUpdates()
+        self.player = pygame.sprite.LayeredUpdates()
+        self.blocks = pygame.sprite.LayeredUpdates()
 
         #Create entities
+        Player(self)
+        Block(self, 2, 2, 2, 2)
 
         #Start game
         self.running = True
