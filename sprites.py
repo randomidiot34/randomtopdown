@@ -2,7 +2,7 @@ import pygame
 from config import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game):
+    def __init__(self, game, x, y):
         self.game = game
 
         #Define render layer
@@ -18,11 +18,13 @@ class Player(pygame.sprite.Sprite):
 
         #Define image
         self.image = pygame.Surface([TILESIZE, TILESIZE])
-        self.image.fill(BLACK)
+        self.image.fill(GREEN)
 
         #Define rect and position
         self.rect = self.image.get_rect()
-    
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
     def update(self):
         self.move()
 
@@ -51,19 +53,19 @@ class Player(pygame.sprite.Sprite):
             self.xChange += PLAYER_SPEED
 
     def collide_blocks(self, direction):
+        #Check for collisions
+        hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
 
+        #Check direction
         if direction == "x":
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
-
+            #Check if player collided and set position
             if hits:
                 if self.xChange < 0:
                     self.rect.left = hits[0].rect.right
                 if self.xChange > 0:
                     self.rect.right = hits[0].rect.left
-
         if direction == "y":
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
-
+            #Check if player collided and set position
             if hits:
                 if self.yChange < 0:
                     self.rect.top = hits[0].rect.bottom
@@ -83,7 +85,7 @@ class Block(pygame.sprite.Sprite):
 
         #Define image
         self.image = pygame.Surface([width * TILESIZE, height * TILESIZE])
-        self.image.fill(RED)
+        self.image.fill(BLACK)
 
         #Define rect and position
         self.rect = self.image.get_rect()

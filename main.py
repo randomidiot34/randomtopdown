@@ -16,12 +16,19 @@ class Game:
         self.player = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
 
-        #Create entities
-        Player(self)
-        Block(self, 2, 2, 2, 2)
-
         #Start game
         self.running = True
+
+        #Load tilemap
+        self.createTilemap()
+
+    def createTilemap(self):
+        for i, row in enumerate(TILEMAP):
+            for j, column in enumerate(row):
+                if column == "B":
+                    Block(self, j, i, 1, 1)
+                if column == "P":
+                    Player(self, j, i)
 
     def events(self):
         #Handle events
