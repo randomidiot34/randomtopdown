@@ -1,4 +1,5 @@
 import pygame
+import random
 from config import *
 
 class Player(pygame.sprite.Sprite):
@@ -116,10 +117,25 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.Surface([TILESIZE, TILESIZE])
         self.image.fill(RED)
 
+        #Define movement variables
+        self.movement_loop = 0
+        self.max_travel = random.randint(7, 50)
+        self.facing = random.choice(["l", "r"])
+
         #Define rect and position
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
     def update(self):
-            pass
+            if self.facing == "l":
+                self.rect.x -= ENEMY_SPEED
+                self.movement_loop -= 1
+                print(self.movement_loop)
+                if self.movement_loop <= -self.max_travel:
+                    self.facing = "r"
+            if self.facing == "r":
+                self.rect.x += ENEMY_SPEED
+                self.movement_loop += 1
+                if self.movement_loop >= self.max_travel:
+                    self.facing = "l"
