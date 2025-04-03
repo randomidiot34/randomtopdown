@@ -15,6 +15,7 @@ class Game:
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.player = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
+        self.enemies = pygame.sprite.LayeredUpdates()
 
         #Start game
         self.running = True
@@ -28,7 +29,9 @@ class Game:
                 if column == "B":
                     Block(self, j, i, 1, 1)
                 if column == "P":
-                    Player(self, j, i)
+                    self.player = Player(self, j, i)
+                if column == "E":
+                    Enemy(self, j, i)
 
     def events(self):
         #Handle events

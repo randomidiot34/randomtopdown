@@ -27,6 +27,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.move()
+        self.collide_enemies()
 
         #Apply move and check for collisions
         self.rect.y += self.yChange
@@ -72,6 +73,14 @@ class Player(pygame.sprite.Sprite):
                 if self.yChange > 0:
                     self.rect.bottom = hits[0].rect.top
 
+    def collide_enemies(self):
+        #Check for collision
+        hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
+
+        #If player collided, end game
+        if hits:
+            self.game.running = False
+
 class Block(pygame.sprite.Sprite):
     def __init__(self, game, x, y, width, height):
         self.game = game
@@ -91,3 +100,26 @@ class Block(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+
+        #Define render layer
+        self._layer = ENEMY_LAYER
+
+        #Define groups
+        self.groups = self.game.all_sprites, self.game.enemies
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        #Define image
+        self.image = pygame.Surface([TILESIZE, TILESIZE])
+        self.image.fill(RED)
+
+        #Define rect and position
+        self.rect = self.image.get_rect()
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+    def update(self):
+            pass
