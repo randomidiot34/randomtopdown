@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.yChange = 0
         self.xChange = 0
         self.y = y * TILESIZE
-        self.x = y * TILESIZE
+        self.x = x * TILESIZE
 
         #Define image
         self.image = pygame.Surface([TILESIZE, TILESIZE])
