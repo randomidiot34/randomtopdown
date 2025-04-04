@@ -96,7 +96,7 @@ class Player(pygame.sprite.Sprite):
 
         #If player collided, end game
         if hits:
-            self.game.running = False
+            self.game.playing = False
 
 class Block(pygame.sprite.Sprite):
     def __init__(self, game, x, y, width, height):
@@ -187,3 +187,38 @@ class Camera:
             self.game.xOffset += PLAYER_SPEED
         if self.game.player.rect.right > CAMERA_BORDER_RIGHT:
             self.game.xOffset -= PLAYER_SPEED
+
+class Button:
+    def __init__(self, x, y, width, height, fg, bg, content, fontsize):
+        #Set font/fontsize
+        self.font = pygame.font.Font("ARIAL.ttf", fontsize)
+
+        #Set other variables
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.fg = fg
+        self.bg = bg
+        self.content = content
+
+        #Set image
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(self.bg)
+        
+        #Set rect
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        #Set text
+        self.text = self.font.render(self.content, True, self.fg)
+        self.text_rect = self.text.get_rect(center=[self.width/2, self.height/2])
+        self.image.blit(self.text, self.text_rect)
+
+    def is_pressed(self, pos, pressed):
+        if self.rect.collidepoint(pos):
+            if pressed[0]:
+                return True
+            return False
+        return False
