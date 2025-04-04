@@ -11,8 +11,12 @@ class Game:
         pygame.display.set_caption(WIN_CAPTION)
         self.clock = pygame.time.Clock()
 
+        #Import images
+        self.background = pygame.image.load("img/background.png").convert()
+
         #Set fonts
         self.font_arial32 = pygame.font.Font("ARIAL.ttf", 32)
+        self.font_arial128 = pygame.font.Font("ARIAL.ttf", 128)
 
         self.running = True
         self.playing = False
@@ -30,10 +34,13 @@ class Game:
     def intro_screen(self):
         intro = True
         
-        title = self.font_arial32.render("Random Topdown", True, BLACK)
-        title_rect = title.get_rect()
+        title = self.font_arial128.render("Random Topdown", True, BLACK)
+        title_rect = title.get_rect(center=([WIN_WIDTH/2, 75]))
 
-        play_button = Button(10, 50, 100, 50, WHITE, BLACK, "PLAY", 32)
+        buttonList = []
+
+        level1 = Button(100, 175, 120, 100, WHITE, BLACK, "Level 1", self.font_arial32)
+        level2 = Button(250, 175, 120, 100, WHITE, BLACK, "Level 2", self.font_arial32)
 
         while intro:
             for event in pygame.event.get():
@@ -43,14 +50,19 @@ class Game:
             mouse_pos = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
 
-            if play_button.is_pressed(mouse_pos, mouse_pressed):
+            if level1.is_pressed(mouse_pos, mouse_pressed):
                 intro = False
                 self.playing = True
-                self.main(TILEMAP)
+                self.main(LEVEL1)
+            if level2.is_pressed(mouse_pos, mouse_pressed):
+                intro = False
+                self.playing = True
+                self.main(LEVEL2)
 
-            self.screen.fill(WHITE)
+            self.screen.blit(self.background)
             self.screen.blit(title, title_rect)
-            self.screen.blit(play_button.image, play_button.rect)
+            self.screen.blit(level1.image, level1.rect)
+            self.screen.blit(level2.image, level2.rect)
             self.clock.tick(FPS)
             pygame.display.update()
 

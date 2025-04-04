@@ -215,9 +215,9 @@ class Camera:
             self.game.xOffset -= PLAYER_SPEED
 
 class Button:
-    def __init__(self, x, y, width, height, fg, bg, content, fontsize):
+    def __init__(self, x, y, width, height, fg, bg, content, font):
         #Set font/fontsize
-        self.font = pygame.font.Font("ARIAL.ttf", fontsize)
+        self.font = font
 
         #Set other variables
         self.x = x
