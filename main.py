@@ -1,4 +1,5 @@
 import pygame
+import sys
 from sprites import *
 from config import *
 
@@ -14,6 +15,12 @@ class Game:
         #Import images
         self.background = pygame.image.load("img/background.png").convert()
 
+        #Import spritesheets
+        self.character_spritesheet = Spritesheet("img/character.png")
+        self.terrain_spritesheet = Spritesheet("img/terrain.png")
+        self.enemy_spritesheet = Spritesheet("img/enemy.png")
+        self.attack_spritesheet = Spritesheet("img/attack.png")
+
         #Set fonts
         self.font_arial32 = pygame.font.Font("ARIAL.ttf", 32)
         self.font_arial128 = pygame.font.Font("ARIAL.ttf", 128)
@@ -24,6 +31,7 @@ class Game:
     def createTilemap(self, level):
         for i, row in enumerate(level):
             for j, column in enumerate(row):
+                Ground(self, j, i)
                 if column == "B":
                     Block(self, j, i, 1, 1)
                 if column == "P":
@@ -33,7 +41,7 @@ class Game:
 
     def intro_screen(self):
         intro = True
-        
+
         title = self.font_arial128.render("Random Topdown", True, BLACK)
         title_rect = title.get_rect(center=([WIN_WIDTH/2, 75]))
 
@@ -46,6 +54,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    sys.exit()
 
             mouse_pos = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
@@ -72,6 +81,7 @@ class Game:
             #Quit
             if event.type == pygame.QUIT:
                 pygame.quit()
+                sys.exit()
 
     def update(self):
         #Update all sprites
@@ -105,7 +115,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-        #When player died, delete all sprites and go back to menu screen
+        #When player dies, delete all sprites and go back to menu screen
         for sprite in self.all_sprites:
             sprite.kill()
         self.intro_screen()
