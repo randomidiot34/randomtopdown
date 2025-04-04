@@ -17,11 +17,16 @@ class Game:
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
 
+        #Set camera offset
+        self.xOffset = 0
+        self.yOffset = 0
+
         #Start game
         self.running = True
 
-        #Load tilemap
+        #Load tilemap and create camera
         self.createTilemap()
+        self.camera = Camera(self)
 
     def createTilemap(self):
         for i, row in enumerate(TILEMAP):
@@ -42,8 +47,9 @@ class Game:
 
     def update(self):
         #Update all sprites
+        self.camera.update()
         self.all_sprites.update()
-        
+
     def draw(self):
         #Draw all sprites
         self.screen.fill(WHITE)

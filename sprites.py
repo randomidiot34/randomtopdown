@@ -16,6 +16,8 @@ class Player(pygame.sprite.Sprite):
         #Define move variables
         self.yChange = 0
         self.xChange = 0
+        self.y = y * TILESIZE
+        self.x = y * TILESIZE
 
         #Define image
         self.image = pygame.Surface([TILESIZE, TILESIZE])
@@ -23,18 +25,26 @@ class Player(pygame.sprite.Sprite):
 
         #Define rect and position
         self.rect = self.image.get_rect()
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     def update(self):
         self.move()
         self.collide_enemies()
 
-        #Apply move and check for collisions
+        # Apply vertical movement and check for collisions
         self.rect.y += self.yChange
         self.collide_blocks("y")
+        self.y += self.yChange  # Update the player's actual position
+
+        # Apply horizontal movement and check for collisions
         self.rect.x += self.xChange
         self.collide_blocks("x")
+        self.x += self.xChange  # Update the player's actual position
+
+        # Update the rect position based on the camera offset
+        self.rect.x = self.x + self.game.xOffset
+        self.rect.y = self.y + self.game.yOffset
 
         #Reset move
         self.yChange = 0
@@ -55,24 +65,30 @@ class Player(pygame.sprite.Sprite):
             self.xChange += PLAYER_SPEED
 
     def collide_blocks(self, direction):
-        #Check for collisions
+        # Check for collisions
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
 
-        #Check direction
+        # Check direction
         if direction == "x":
-            #Check if player collided and set position
+            # Check if player collided and set position
             if hits:
                 if self.xChange < 0:
                     self.rect.left = hits[0].rect.right
                 if self.xChange > 0:
                     self.rect.right = hits[0].rect.left
+                # Update the player's actual position
+                self.x = self.rect.x - self.game.xOffset
+                self.xChange = 0
         if direction == "y":
-            #Check if player collided and set position
+            # Check if player collided and set position
             if hits:
                 if self.yChange < 0:
                     self.rect.top = hits[0].rect.bottom
                 if self.yChange > 0:
                     self.rect.bottom = hits[0].rect.top
+                # Update the player's actual position
+                self.y = self.rect.y - self.game.yOffset
+                self.yChange = 0
 
     def collide_enemies(self):
         #Check for collision
@@ -97,10 +113,19 @@ class Block(pygame.sprite.Sprite):
         self.image = pygame.Surface([width * TILESIZE, height * TILESIZE])
         self.image.fill(BLACK)
 
+        #Define move variabels for camera
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+
         #Define rect and position
         self.rect = self.image.get_rect()
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        #Move block for camera
+        self.rect.x = self.x + self.game.xOffset
+        self.rect.y = self.y + self.game.yOffset
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -118,24 +143,47 @@ class Enemy(pygame.sprite.Sprite):
         self.image.fill(RED)
 
         #Define movement variables
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
         self.movement_loop = 0
         self.max_travel = random.randint(7, 50)
         self.facing = random.choice(["l", "r"])
 
         #Define rect and position
         self.rect = self.image.get_rect()
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     def update(self):
-            if self.facing == "l":
-                self.rect.x -= ENEMY_SPEED
-                self.movement_loop -= 1
-                print(self.movement_loop)
-                if self.movement_loop <= -self.max_travel:
-                    self.facing = "r"
-            if self.facing == "r":
-                self.rect.x += ENEMY_SPEED
-                self.movement_loop += 1
-                if self.movement_loop >= self.max_travel:
-                    self.facing = "l"
+        #Check direction
+        if self.facing == "l":
+            #Move and check if direction change is necesarry
+            self.x -= ENEMY_SPEED
+            self.movement_loop -= 1
+            if self.movement_loop <= -self.max_travel:
+                self.facing = "r"
+        if self.facing == "r":
+            #Move and check if direction change is necesarry
+            self.x += ENEMY_SPEED
+            self.movement_loop += 1
+            if self.movement_loop >= self.max_travel:
+                self.facing = "l"
+
+        #Apply move
+        self.rect.x = self.x + self.game.xOffset
+        self.rect.y = self.y + self.game.yOffset
+
+class Camera:
+    def __init__(self, game):
+        self.game = game
+
+    def update(self):
+        #Check if player moved past border
+        if self.game.player.rect.top < CAMERA_BORDER_TOP:
+            self.game.yOffset += PLAYER_SPEED
+        if self.game.player.rect.bottom > CAMERA_BORDER_BOTTOM:
+            self.game.yOffset -= PLAYER_SPEED
+        if self.game.player.rect.left < CAMERA_BORDER_LEFT:
+            self.game.xOffset += PLAYER_SPEED
+        if self.game.player.rect.right > CAMERA_BORDER_RIGHT:
+            self.game.xOffset -= PLAYER_SPEED
