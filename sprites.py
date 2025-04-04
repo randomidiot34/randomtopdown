@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from config import *
 
 class Player(pygame.sprite.Sprite):
@@ -23,24 +24,30 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface([TILESIZE, TILESIZE])
         self.image.fill(GREEN)
 
+        #Set direction
+        self.facing = "up"
+
+        #Define lastAttackTime
+        self.lastAttackTime = 0
+
         #Define rect and position
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
 
     def update(self):
-        self.move()
+        self.input()
         self.collide_enemies()
 
         # Apply vertical movement and check for collisions
         self.rect.y += self.yChange
         self.collide_blocks("y")
-        self.y += self.yChange  # Update the player's actual position
+        self.y += self.yChange
 
         # Apply horizontal movement and check for collisions
         self.rect.x += self.xChange
         self.collide_blocks("x")
-        self.x += self.xChange  # Update the player's actual position
+        self.x += self.xChange
 
         # Update the rect position based on the camera offset
         self.rect.x = self.x + self.game.xOffset
@@ -50,19 +57,38 @@ class Player(pygame.sprite.Sprite):
         self.yChange = 0
         self.xChange = 0
 
-    def move(self):
-        #Get pressed keys
+    def input(self):
+        # Get pressed keys
         keys = pygame.key.get_pressed()
 
-        #Check key
+        # Movement
         if keys[pygame.K_w]:
             self.yChange -= PLAYER_SPEED
+            self.facing = "up"
         if keys[pygame.K_s]:
             self.yChange += PLAYER_SPEED
+            self.facing = "down"
         if keys[pygame.K_a]:
             self.xChange -= PLAYER_SPEED
+            self.facing = "left"
         if keys[pygame.K_d]:
             self.xChange += PLAYER_SPEED
+            self.facing = "right"
+
+        # Attack
+        if keys[pygame.K_SPACE]:
+            if self.facing == "up" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
+                Attack(self.game, self.x, self.y - TILESIZE)
+                self.lastAttackTime = time.time()
+            if self.facing == "down" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
+                Attack(self.game, self.x, self.y + TILESIZE)
+                self.lastAttackTime = time.time()
+            if self.facing == "right" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
+                Attack(self.game, self.x + TILESIZE, self.y)
+                self.lastAttackTime = time.time()
+            if self.facing == "left" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
+                Attack(self.game, self.x - TILESIZE, self.y)
+                self.lastAttackTime = time.time()
 
     def collide_blocks(self, direction):
         # Check for collisions
@@ -222,3 +248,44 @@ class Button:
                 return True
             return False
         return False
+
+class Attack(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+        self.x = x
+        self.y = y
+        self.width = TILESIZE
+        self.height = TILESIZE
+
+        #Set render layer
+        self._layer = ATTACK_LAYER
+
+        #Set groups
+        self.groups = self.game.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        #Create image
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill(BLUE)
+
+        #Create rect
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        #Set initial time
+        self.initialTime = time.time()
+
+    def update(self):
+        self.collide_enemy()
+
+        #Kill attack if linger time has passed
+        if time.time() - self.initialTime >= ATTACK_LINGER_TIME:
+            self.kill()
+
+        #Move for camera
+        self.rect.x = self.x + self.game.xOffset
+        self.rect.y = self.y + self.game.yOffset
+ 
+    def collide_enemy(self):
+        hits = pygame.sprite.spritecollide(self, self.game.enemies, True)
