@@ -68,7 +68,7 @@ class Game:
                 self.playing = True
                 self.main(LEVEL2)
 
-            self.screen.blit(self.background)
+            self.screen.blit(self.background, (0,0))
             self.screen.blit(title, title_rect)
             self.screen.blit(level1.image, level1.rect)
             self.screen.blit(level2.image, level2.rect)

@@ -470,4 +470,3 @@ class Camera:
             self.game.xOffset += PLAYER_SPEED
         if self.game.player.rect.right > CAMERA_BORDER_RIGHT:
             self.game.xOffset -= PLAYER_SPEED
-
