@@ -42,13 +42,17 @@ class Game:
     def intro_screen(self):
         intro = True
 
-        title = self.font_arial128.render("Random Topdown", True, BLACK)
-        title_rect = title.get_rect(center=([WIN_WIDTH/2, 75]))
+        textList = []
+
+        title = Text(game, WIN_WIDTH/2, 75, BLACK, "RandomTopDown", self.font_arial128, True)
+        textList.append(title)
 
         buttonList = []
 
-        level1 = Button(100, 175, 120, 100, WHITE, BLACK, "Level 1", self.font_arial32)
-        level2 = Button(250, 175, 120, 100, WHITE, BLACK, "Level 2", self.font_arial32)
+        level1 = Button(game, 100, 175, 120, 100, WHITE, BLACK, "Level 1", self.font_arial32)
+        buttonList.append(level1)
+        level2 = Button(game, 250, 175, 120, 100, WHITE, BLACK, "Level 2", self.font_arial32)
+        buttonList.append(level2)
 
         while intro:
             for event in pygame.event.get():
@@ -69,9 +73,10 @@ class Game:
                 self.main(LEVEL2)
 
             self.screen.blit(self.background, (0,0))
-            self.screen.blit(title, title_rect)
-            self.screen.blit(level1.image, level1.rect)
-            self.screen.blit(level2.image, level2.rect)
+            for text in textList:
+                text.draw()
+            for button in buttonList:
+                button.draw()
             self.clock.tick(FPS)
             pygame.display.update()
 

@@ -412,7 +412,9 @@ class Ground(pygame.sprite.Sprite):
         self.rect.y = self.y + self.game.yOffset
 
 class Button:
-    def __init__(self, x, y, width, height, fg, bg, content, font):
+    def __init__(self, game, x, y, width, height, fg, bg, content, font):
+        self.game = game
+
         #Set font/fontsize
         self.font = font
 
@@ -445,6 +447,33 @@ class Button:
                 return True
             return False
         return False
+    
+    def draw(self):
+        self.game.screen.blit(self.image, self.rect)
+    
+class Text():
+    def __init__(self, game, x, y, color, content, font, centered):
+        self.game = game
+        self.x = x
+        self.y = y
+        self.color = color
+        self.content = content
+        self.font = font
+        self.centered = centered
+
+        #Text
+        self.text = self.font.render(content, True, color)
+
+        #Rect
+        if self.centered:
+            self.rect = self.text.get_rect(center=([self.x, self.y]))
+        else:
+            self.rect = self.text.get_rect()
+            self.rect.x = self.x
+            self.rect.y = self.y
+
+    def draw(self):
+        self.game.screen.blit(self.text, self.rect)
 
 class Spritesheet:
     def __init__(self, file):
