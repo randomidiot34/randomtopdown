@@ -22,8 +22,13 @@ class Game:
         self.attack_spritesheet = Spritesheet("img/attack.png")
 
         #Set fonts
-        self.font_arial32 = pygame.font.Font("ARIAL.ttf", 32)
-        self.font_arial128 = pygame.font.Font("ARIAL.ttf", 128)
+        self.font_arial32 = pygame.font.Font("font/ARIAL.ttf", 32)
+        self.font_arial128 = pygame.font.Font("font/ARIAL.ttf", 128)
+
+        #Import sounds
+        self.sfx_walk = pygame.mixer.Sound("sfx/walk.mp3")
+        self.sfx_attack_normal = pygame.mixer.Sound("sfx/attack_normal.mp3")
+        self.sfx_enemy_kill = pygame.mixer.Sound("sfx/enemy_kill.mp3")
 
         self.running = True
         self.playing = False
@@ -120,8 +125,10 @@ class Game:
             self.events()
             self.update()
             self.draw()
+
         #When player dies, delete all sprites and go back to menu screen
         for sprite in self.all_sprites:
+            pygame.mixer.stop()
             sprite.kill()
         self.intro_screen()
 

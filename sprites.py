@@ -20,6 +20,8 @@ class Player(pygame.sprite.Sprite):
         self.xChange = 0
         self.y = y * TILESIZE
         self.x = x * TILESIZE
+        self.walking = False
+        self.playing = False
 
         #Define image
         self.image = self.game.character_spritesheet.get_sprite(3, 2, TILESIZE, TILESIZE)
@@ -77,20 +79,32 @@ class Player(pygame.sprite.Sprite):
             self.xChange += PLAYER_SPEED
             self.facing = "right"
 
+        #Walk sound
+        if (not self.yChange == 0 or not self.xChange == 0) and not self.playing:
+            self.game.sfx_walk.play(-1)
+            self.playing = True
+        if self.yChange == 0 and self.xChange == 0:
+                self.game.sfx_walk.stop()
+                self.playing = False
+
         # Attack
         if keys[pygame.K_SPACE]:
             if self.facing == "up" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
                 Attack(self.game, self.x, self.y - TILESIZE, "up")
                 self.lastAttackTime = time.time()
+                self.game.sfx_attack_normal.play()
             if self.facing == "down" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
                 Attack(self.game, self.x, self.y + TILESIZE, "down")
                 self.lastAttackTime = time.time()
+                self.game.sfx_attack_normal.play()
             if self.facing == "right" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
                 Attack(self.game, self.x + TILESIZE, self.y, "left")
                 self.lastAttackTime = time.time()
+                self.game.sfx_attack_normal.play()
             if self.facing == "left" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
                 Attack(self.game, self.x - TILESIZE, self.y, "right")
                 self.lastAttackTime = time.time()
+                self.game.sfx_attack_normal.play()
 
     def collide_blocks(self, direction):
         # Check for collisions
@@ -218,6 +232,8 @@ class Attack(pygame.sprite.Sprite):
     def collide_enemy(self):
         #Check if collided with enemy and delete enemy
         hits = pygame.sprite.spritecollide(self, self.game.enemies, True)
+        if hits:
+            self.game.sfx_enemy_kill.play()
 
     def animate(self):
         right_animations = [self.game.attack_spritesheet.get_sprite(0, 64, self.width, self.height),
