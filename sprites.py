@@ -53,10 +53,6 @@ class Player(pygame.sprite.Sprite):
         self.collide_blocks("x")
         self.x += self.xChange
 
-        # Update the rect position based on the camera offset
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
-
         #Reset move
         self.yChange = 0
         self.xChange = 0
@@ -224,10 +220,6 @@ class Attack(pygame.sprite.Sprite):
     def update(self):
         self.collide_enemy()
         self.animate()
-
-        #Move for camera
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
  
     def collide_enemy(self):
         #Check if collided with enemy and delete enemy
@@ -328,10 +320,6 @@ class Enemy(pygame.sprite.Sprite):
             if self.movement_loop >= self.max_travel:
                 self.facing = "left"
 
-        #Apply move
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
-
     def animate(self):
         down_animations = [self.game.enemy_spritesheet.get_sprite(3, 2, TILESIZE,TILESIZE),
                            self.game.enemy_spritesheet.get_sprite(35, 2, TILESIZE,TILESIZE),
@@ -394,11 +382,6 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-    def update(self):
-        #Move block for camera
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
-
 class Ground(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
@@ -422,10 +405,6 @@ class Ground(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-    def update(self):
-        #Move for camera
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
 
 class Button:
     def __init__(self, game, x, y, width, height, fg, bg, content, font):
@@ -515,3 +494,7 @@ class Camera:
             self.game.xOffset += PLAYER_SPEED
         if self.game.player.rect.right > CAMERA_BORDER_RIGHT:
             self.game.xOffset -= PLAYER_SPEED
+
+        for sprite in self.game.all_sprites:
+            sprite.rect.x = sprite.x + self.game.xOffset
+            sprite.rect.y = sprite.y + self.game.yOffset
