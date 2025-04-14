@@ -5,14 +5,15 @@ import math
 from config import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, scene, x, y):
         self.game = game
+        self.scene = scene
 
         #Define render layer
         self._layer = PLAYER_LAYER
 
         #define groups
-        self.groups = self.game.all_sprites, self.game.player
+        self.groups = self.scene.all_sprites, self.scene.player
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Define move variables
@@ -86,25 +87,25 @@ class Player(pygame.sprite.Sprite):
         # Attack
         if keys[pygame.K_SPACE]:
             if self.facing == "up" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
-                Attack(self.game, self.x, self.y - TILESIZE, "up")
+                Attack(self.game, self.scene, self.x, self.y - TILESIZE, "up")
                 self.lastAttackTime = time.time()
                 self.game.sfx_attack_normal.play()
             if self.facing == "down" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
-                Attack(self.game, self.x, self.y + TILESIZE, "down")
+                Attack(self.game, self.scene, self.x, self.y + TILESIZE, "down")
                 self.lastAttackTime = time.time()
                 self.game.sfx_attack_normal.play()
             if self.facing == "right" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
-                Attack(self.game, self.x + TILESIZE, self.y, "left")
+                Attack(self.game, self.scene, self.x + TILESIZE, self.y, "left")
                 self.lastAttackTime = time.time()
                 self.game.sfx_attack_normal.play()
             if self.facing == "left" and time.time() - self.lastAttackTime >= ATTACK_COOLDOWN:
-                Attack(self.game, self.x - TILESIZE, self.y, "right")
+                Attack(self.game, self.scene, self.x - TILESIZE, self.y, "right")
                 self.lastAttackTime = time.time()
                 self.game.sfx_attack_normal.play()
 
     def collide_blocks(self, direction):
         # Check for collisions
-        hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+        hits = pygame.sprite.spritecollide(self, self.scene.blocks, False)
 
         # Check direction
         if direction == "x":
@@ -115,7 +116,7 @@ class Player(pygame.sprite.Sprite):
                 if self.xChange > 0:
                     self.rect.right = hits[0].rect.left
                 # Update the player's actual position
-                self.x = self.rect.x - self.game.xOffset
+                self.x = self.rect.x - self.scene.xOffset
                 self.xChange = 0
         if direction == "y":
             # Check if player collided and set position
@@ -125,16 +126,16 @@ class Player(pygame.sprite.Sprite):
                 if self.yChange > 0:
                     self.rect.bottom = hits[0].rect.top
                 # Update the player's actual position
-                self.y = self.rect.y - self.game.yOffset
+                self.y = self.rect.y - self.scene.yOffset
                 self.yChange = 0
 
     def collide_enemies(self):
         #Check for collision
-        hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        hits = pygame.sprite.spritecollide(self, self.scene.enemies, False)
 
         #If player collided, end game
         if hits:
-            self.game.playing = False
+            self.scene.die()
 
     def animate(self):
         down_animations = [self.game.character_spritesheet.get_sprite(3, 2, TILESIZE,TILESIZE),
@@ -190,8 +191,9 @@ class Player(pygame.sprite.Sprite):
                     self.animationLoop = 1
 
 class Attack(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, direction):
+    def __init__(self, game, scene, x, y, direction):
         self.game = game
+        self.scene = scene
         self.x = x
         self.y = y
         self.width = TILESIZE
@@ -201,7 +203,7 @@ class Attack(pygame.sprite.Sprite):
         self._layer = ATTACK_LAYER
 
         #Set groups
-        self.groups = self.game.all_sprites
+        self.groups = self.scene.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Create image and set animation loop
@@ -211,8 +213,8 @@ class Attack(pygame.sprite.Sprite):
 
         #Create rect
         self.rect = self.image.get_rect()
-        self.rect.x = self.x + self.game.xOffset
-        self.rect.y = self.y + self.game.yOffset
+        self.rect.x = self.x + self.scene.xOffset
+        self.rect.y = self.y + self.scene.yOffset
 
         #Set initial time
         self.initialTime = time.time()
@@ -223,7 +225,7 @@ class Attack(pygame.sprite.Sprite):
  
     def collide_enemy(self):
         #Check if collided with enemy and delete enemy
-        hits = pygame.sprite.spritecollide(self, self.game.enemies, True)
+        hits = pygame.sprite.spritecollide(self, self.scene.enemies, True)
         if hits:
             self.game.sfx_enemy_kill.play()
 
@@ -274,14 +276,15 @@ class Attack(pygame.sprite.Sprite):
                 self.kill()
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, scene, x, y):
         self.game = game
+        self.scene = scene
 
         #Define render layer
         self._layer = ENEMY_LAYER
 
         #Define groups
-        self.groups = self.game.all_sprites, self.game.enemies
+        self.groups = self.scene.all_sprites, self.scene.enemies
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Define image
@@ -360,14 +363,15 @@ class Enemy(pygame.sprite.Sprite):
                 self.animationLoop = 1
 
 class Block(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, width, height):
+    def __init__(self, game, scene, x, y, width, height):
         self.game = game
+        self.scene = scene
 
         #Define render layer
         self._layer = BLOCK_LAYER
 
         #define groups
-        self.groups = self.game.all_sprites, self.game.blocks
+        self.groups = self.scene.all_sprites, self.scene.blocks
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Define image
@@ -383,14 +387,15 @@ class Block(pygame.sprite.Sprite):
         self.rect.y = self.y
 
 class Ground(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, scene, x, y):
         self.game = game
+        self.scene = scene
 
         #Set render layer
         self._layer = GROUND_LAYER
 
         #Set groups
-        self.groups = self.game.all_sprites
+        self.groups = self.scene.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Set move variables
@@ -406,9 +411,10 @@ class Ground(pygame.sprite.Sprite):
         self.rect.y = self.y
 
 
-class Button:
-    def __init__(self, game, x, y, width, height, fg, bg, content, font):
+class Button(pygame.sprite.Sprite):
+    def __init__(self, game, scene, x, y, width, height, fg, bg, content, font):
         self.game = game
+        self.scene = scene
 
         #Set font/fontsize
         self.font = font
@@ -421,6 +427,10 @@ class Button:
         self.fg = fg
         self.bg = bg
         self.content = content
+
+        #Set group
+        self.groups = self.scene.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
 
         #Set image
         self.image = pygame.Surface([self.width, self.height])
@@ -435,20 +445,18 @@ class Button:
         self.text = self.font.render(self.content, True, self.fg)
         self.text_rect = self.text.get_rect(center=[self.width/2, self.height/2])
         self.image.blit(self.text, self.text_rect)
-
-    def is_pressed(self, pos, pressed):
-        if self.rect.collidepoint(pos):
-            if pressed[0]:
+    
+    def get_pressed(self):
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            if pygame.mouse.get_pressed()[0]:
                 return True
             return False
         return False
-    
-    def draw(self):
-        self.game.screen.blit(self.image, self.rect)
-    
-class Text():
-    def __init__(self, game, x, y, color, content, font, centered):
+
+class Text(pygame.sprite.Sprite):
+    def __init__(self, game, scene, x, y, color, content, font, centered):
         self.game = game
+        self.scene = scene
         self.x = x
         self.y = y
         self.color = color
@@ -456,19 +464,20 @@ class Text():
         self.font = font
         self.centered = centered
 
+        #Set groups
+        self.groups = self.scene.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
         #Text
-        self.text = self.font.render(content, True, color)
+        self.image = self.font.render(content, True, color)
 
         #Rect
         if self.centered:
-            self.rect = self.text.get_rect(center=([self.x, self.y]))
+            self.rect = self.image.get_rect(center=([self.x, self.y]))
         else:
-            self.rect = self.text.get_rect()
+            self.rect = self.image.get_rect()
             self.rect.x = self.x
             self.rect.y = self.y
-
-    def draw(self):
-        self.game.screen.blit(self.text, self.rect)
 
 class Spritesheet:
     def __init__(self, file):
@@ -481,20 +490,20 @@ class Spritesheet:
         return sprite
 
 class Camera:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, scene):
+        self.scene = scene
 
     def update(self):
         #Check if player moved past border
-        if self.game.player.rect.top < CAMERA_BORDER_TOP:
-            self.game.yOffset += PLAYER_SPEED
-        if self.game.player.rect.bottom > CAMERA_BORDER_BOTTOM:
-            self.game.yOffset -= PLAYER_SPEED
-        if self.game.player.rect.left < CAMERA_BORDER_LEFT:
-            self.game.xOffset += PLAYER_SPEED
-        if self.game.player.rect.right > CAMERA_BORDER_RIGHT:
-            self.game.xOffset -= PLAYER_SPEED
+        if self.scene.player.rect.top < CAMERA_BORDER_TOP:
+            self.scene.yOffset += PLAYER_SPEED
+        if self.scene.player.rect.bottom > CAMERA_BORDER_BOTTOM:
+            self.scene.yOffset -= PLAYER_SPEED
+        if self.scene.player.rect.left < CAMERA_BORDER_LEFT:
+            self.scene.xOffset += PLAYER_SPEED
+        if self.scene.player.rect.right > CAMERA_BORDER_RIGHT:
+            self.scene.xOffset -= PLAYER_SPEED
 
-        for sprite in self.game.all_sprites:
-            sprite.rect.x = sprite.x + self.game.xOffset
-            sprite.rect.y = sprite.y + self.game.yOffset
+        for sprite in self.scene.all_sprites:
+            sprite.rect.x = sprite.x + self.scene.xOffset
+            sprite.rect.y = sprite.y + self.scene.yOffset

@@ -2,6 +2,7 @@ import pygame
 import sys
 from sprites import *
 from config import *
+from scenes import *
 
 class Game:
     def __init__(self):
@@ -30,60 +31,11 @@ class Game:
         self.sfx_attack_normal = pygame.mixer.Sound("sfx/attack_normal.mp3")
         self.sfx_enemy_kill = pygame.mixer.Sound("sfx/enemy_kill.mp3")
 
+        #Set initial scene
+        self.scene = main_menu(self)
+
+        #Start game
         self.running = True
-        self.playing = False
-
-    def createTilemap(self, level):
-        for i, row in enumerate(level):
-            for j, column in enumerate(row):
-                Ground(self, j, i)
-                if column == "B":
-                    Block(self, j, i, 1, 1)
-                if column == "P":
-                    self.player = Player(self, j, i)
-                if column == "E":
-                    Enemy(self, j, i)
-
-    def intro_screen(self):
-        intro = True
-
-        textList = []
-
-        title = Text(game, WIN_WIDTH/2, 75, BLACK, "RandomTopDown", self.font_arial128, True)
-        textList.append(title)
-
-        buttonList = []
-
-        level1 = Button(game, 100, 175, 120, 100, WHITE, BLACK, "Level 1", self.font_arial32)
-        buttonList.append(level1)
-        level2 = Button(game, 250, 175, 120, 100, WHITE, BLACK, "Level 2", self.font_arial32)
-        buttonList.append(level2)
-
-        while intro:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            mouse_pos = pygame.mouse.get_pos()
-            mouse_pressed = pygame.mouse.get_pressed()
-
-            if level1.is_pressed(mouse_pos, mouse_pressed):
-                intro = False
-                self.playing = True
-                self.main(LEVEL1)
-            if level2.is_pressed(mouse_pos, mouse_pressed):
-                intro = False
-                self.playing = True
-                self.main(LEVEL2)
-
-            self.screen.blit(self.background, (0,0))
-            for text in textList:
-                text.draw()
-            for button in buttonList:
-                button.draw()
-            self.clock.tick(FPS)
-            pygame.display.update()
 
     def events(self):
         #Handle events
@@ -93,47 +45,24 @@ class Game:
                 pygame.quit()
                 sys.exit()
 
-    def update(self):
-        #Update all sprites
-        self.camera.update()
-        self.all_sprites.update()
-
     def draw(self):
         #Draw all sprites
         self.screen.fill(WHITE)
-        self.all_sprites.draw(self.screen)
+        self.scene.draw()
         self.clock.tick(FPS)
         pygame.display.update()
 
-    def main(self, level):
-        #Set groups
-        self.all_sprites = pygame.sprite.LayeredUpdates()
-        self.player = pygame.sprite.LayeredUpdates()
-        self.blocks = pygame.sprite.LayeredUpdates()
-        self.enemies = pygame.sprite.LayeredUpdates()
-
-        #Set camera offset
-        self.xOffset = 0
-        self.yOffset = 0
-
-        #Load tilemap and create camera
-        self.createTilemap(level)
-        self.camera = Camera(self)
+    def main(self):
+        self.running
 
         #Gameloop
-        while self.playing:
+        while self.running:
             self.events()
-            self.update()
+            self.scene.update()
             self.draw()
-
-        #When player dies, delete all sprites and go back to menu screen
-        for sprite in self.all_sprites:
-            pygame.mixer.stop()
-            sprite.kill()
-        self.intro_screen()
 
 game = Game()
 
-game.intro_screen()
+game.main()
 
 pygame.quit()
